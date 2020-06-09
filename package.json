@@ -9,8 +9,5 @@
         "nodes": {
             "ss963-driver": "ss963-driver.js"
         }
-    },
-  "dependencies": {
-       "detect-rpi": "*"
   }
 }

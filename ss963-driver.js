@@ -14,17 +14,34 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType('ss963-config', ss963ConfigNode);
 
+	/*
+		---------------------------------------------------------------
+	*/
     function driverNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
 		node.configNode = RED.nodes.getNode(config.configName);
 
+		// Check Raspberry Pi Hardware
+/*
+		var isPi = require('detect-rpi');
+		if (!isPi()
+			node.error("detect-rpi: The ss963-driver node requires Raspberry Pi but could not detect Raspberry Pi Hardware.");
+*/
+		// Check SPI Enabled
+		const fs = require('fs')
+		if (!fs.existsSync('/dev/spidev0.0'))
+			node.error("SPI port is not enabled!");
 
-var isPi = require('detect-rpi');
+		// Check SHM Listener Service
 
-if (isPi()) {
-node.error("RPi uzerinde calisiyor.");
-}
+		const { exec } = require("child_process");
+		exec("sudo systemctl status apache2 | grep active",
+			(error, stdout, stderr) => {
+				if (!stdout.includes("Active: active (running)"))
+					node.error("SHM Listener driver not loaded.");
+			});
+
 
 
 //		node.portCount = configNode.portCount;
@@ -38,13 +55,8 @@ node.error("RPi uzerinde calisiyor.");
         node.on('input', function(msg) {
 
 			try {
-
-
 		        node.status({ fill:"red", shape:"dot", text: node.configNode.portCount});
-//		node.error(config);
-
-
-
+				// Array.isArray(msg.payload))
 
 			} catch (error) {
 
