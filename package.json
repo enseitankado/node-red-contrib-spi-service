@@ -1,0 +1,16 @@
+{
+  "name": "node-red-contrib-ss963-driver",
+  "version": "1.0.0",
+  "description": "ss963 SHM driver",
+  "main": "ss963-driver.js",
+  "author": "Ozgur Koca",
+  "license": "ISC",
+  "node-red" : {
+        "nodes": {
+            "ss963-driver": "ss963-driver.js"
+        }
+    },
+  "dependencies": {
+       "detect-rpi": "*"
+  }
+}

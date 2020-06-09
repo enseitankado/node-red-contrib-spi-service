@@ -1,0 +1,73 @@
+<script tpe="text/javascript">
+
+    RED.nodes.registerType('ss963-config',{
+        category: 'config',
+        defaults: {
+            configLabel:    {value:"",      required:true},
+            portCount:      {value:96,      required:true, validate:RED.validators.number()},
+            latchPin:       {value:2,       required:true, validate:RED.validators.number()},
+            latchDelay:     {value:"0",     required:true, validate:RED.validators.number()},
+            speed:          {value:4000000, required:true, validate:RED.validators.number()},
+            loopDelayUs:    {value:100,     required:true, validate:RED.validators.number()}
+        },
+        label: function() {
+            return this.configLabel || this.portCount + " Ports";
+        }
+    });
+
+    RED.nodes.registerType('ss963-driver',{
+        category: 'Raspberry Pi',
+        color: '#FDF0C2',
+        defaults: {
+			configName: {value:"", type:"ss963-config", required: true},
+			name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "serial.png",
+        label: function() {
+            var configNode = RED.nodes.node(this.configName);
+            return this.name || (configNode ? configNode.label() : "ss963 Driver");
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ss963-driver">
+    <div class="form-row">
+        <label for="node-input-configName"><i class="icon-tag"></i>Name</label>
+        <input type="text" id="node-input-configName" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-template-name="ss963-config">
+
+    <div class="form-row">
+        <label for="node-config-input-configLabel"><i class="icon-bookmark"></i> Config Label</label>
+        <input type="text" id="node-config-input-configLabel">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-portCount"><i class="icon-bookmark"></i> Port Count</label>
+        <input type="text" id="node-config-input-portCount">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-latchPin"><i class="icon-bookmark"></i> Latch Pin</label>
+        <input type="text" id="node-config-input-latchPin">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-latchDelay"><i class="icon-bookmark"></i> Latch Delay</label>
+        <input type="text" id="node-config-input-latchDelay">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-speed"><i class="icon-bookmark"></i> Speed </label>
+        <input type="text" id="node-config-input-speed">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-loopDelayUs"><i class="icon-bookmark"></i> Loop Delay</label>
+        <input type="text" id="node-config-input-loopDelayUs">
+    </div>
+</script>
