@@ -5,9 +5,13 @@
   "main": "ss963-driver.js",
   "author": "Ozgur Koca",
   "license": "ISC",
-  "node-red" : {
-        "nodes": {
-            "ss963-driver": "ss963-driver.js"
-        }
+  "node-red": {
+    "nodes": {
+      "ss963-driver": "ss963-driver.js"
+    }
+  },
+  "dependencies": {
+    "detect-rpi": "^1.4.0",
+    "ini": "^1.3.5"
   }
 }

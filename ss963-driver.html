@@ -24,12 +24,21 @@
         },
         inputs:1,
         outputs:1,
-        icon: "serial.png",
+        icon: "font-awesome/fa-flash",
+		paletteLabel: "palet ss963",
         label: function() {
             var configNode = RED.nodes.node(this.configName);
-            return this.name || (configNode ? configNode.label() : "ss963 Driver");
-        }
-    });
+            return this.name || (configNode ? configNode.configLabel : "SS963 Service");
+        },
+		oneditsave: function() {
+
+			$.getJSON('getServiceConfig',function(data) {
+    			//... does stuff with data
+				console.log(data);
+			});
+
+		}
+	});
 </script>
 
 <script type="text/html" data-template-name="ss963-driver">
@@ -70,4 +79,7 @@
         <label for="node-config-input-loopDelayUs"><i class="icon-bookmark"></i> Loop Delay</label>
         <input type="text" id="node-config-input-loopDelayUs">
     </div>
+
+
+
 </script>
