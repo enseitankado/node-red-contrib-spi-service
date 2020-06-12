@@ -1,42 +1,35 @@
 <script tpe="text/javascript">
 
-    RED.nodes.registerType('ss963-config',{
-        category: 'config',
+    RED.nodes.registerType('ss963-driver',{
+        category: 'Raspberry Pi',
+        color: '#FDF0C2',
         defaults: {
-            configLabel:    {value:"",      required:true},
+			configName: 	{value:"", 		required: true},
             portCount:      {value:96,      required:true, validate:RED.validators.number()},
             latchPin:       {value:2,       required:true, validate:RED.validators.number()},
             latchDelay:     {value:"0",     required:true, validate:RED.validators.number()},
             speed:          {value:4000000, required:true, validate:RED.validators.number()},
             loopDelayUs:    {value:100,     required:true, validate:RED.validators.number()}
         },
-        label: function() {
-            return this.configLabel || this.portCount + " Ports";
-        }
-    });
-
-    RED.nodes.registerType('ss963-driver',{
-        category: 'Raspberry Pi',
-        color: '#FDF0C2',
-        defaults: {
-			configName: {value:"", type:"ss963-config", required: true},
-			name: {value:""}
-        },
         inputs:1,
         outputs:1,
         icon: "font-awesome/fa-flash",
-		paletteLabel: "palet ss963",
+		paletteLabel: "SS963",
         label: function() {
-            var configNode = RED.nodes.node(this.configName);
-            return this.name || (configNode ? configNode.configLabel : "SS963 Service");
+            return this.name ||  "SS963 Service";
         },
 		oneditsave: function() {
-
-			$.getJSON('getServiceConfig',function(data) {
-    			//... does stuff with data
-				console.log(data);
-			});
-
+				
+		},		
+		oneditprepare: function() {
+            $.getJSON('getServiceConfFile', function(confFile) {
+				$("#node-input-portCount").val(confFile.PORT_COUNT);
+				$("#node-input-latchPin").val(confFile.LATCH_PIN);
+				$("#node-input-latchDelay").val(confFile.LATCH_DELAY);
+				$("#node-input-speed").val(confFile.SPEED);
+				$("#node-input-loopDelayUs").val(confFile.LOOP_DELAY_US);
+                console.log(data);
+            });			 
 		}
 	});
 </script>
@@ -46,40 +39,24 @@
         <label for="node-input-configName"><i class="icon-tag"></i>Name</label>
         <input type="text" id="node-input-configName" placeholder="Name">
     </div>
-</script>
-
-<script type="text/html" data-template-name="ss963-config">
-
     <div class="form-row">
-        <label for="node-config-input-configLabel"><i class="icon-bookmark"></i> Config Label</label>
-        <input type="text" id="node-config-input-configLabel">
+        <label for="node-input-portCount"><i class="icon-bookmark"></i> Port Count</label>
+        <input type="text" id="node-input-portCount">
     </div>
-
     <div class="form-row">
-        <label for="node-config-input-portCount"><i class="icon-bookmark"></i> Port Count</label>
-        <input type="text" id="node-config-input-portCount">
+        <label for="node-input-latchPin"><i class="icon-bookmark"></i> Latch Pin</label>
+        <input type="text" id="node-input-latchPin">
     </div>
-
     <div class="form-row">
-        <label for="node-config-input-latchPin"><i class="icon-bookmark"></i> Latch Pin</label>
-        <input type="text" id="node-config-input-latchPin">
+        <label for="node-input-latchDelay"><i class="icon-bookmark"></i> Latch Delay</label>
+        <input type="text" id="node-input-latchDelay">
     </div>
-
     <div class="form-row">
-        <label for="node-config-input-latchDelay"><i class="icon-bookmark"></i> Latch Delay</label>
-        <input type="text" id="node-config-input-latchDelay">
+        <label for="node-input-speed"><i class="icon-bookmark"></i> Speed </label>
+        <input type="text" id="node-input-speed">
     </div>
-
     <div class="form-row">
-        <label for="node-config-input-speed"><i class="icon-bookmark"></i> Speed </label>
-        <input type="text" id="node-config-input-speed">
+        <label for="node-input-loopDelayUs"><i class="icon-bookmark"></i> Loop Delay</label>
+        <input type="text" id="node-input-loopDelayUs">
     </div>
-
-    <div class="form-row">
-        <label for="node-config-input-loopDelayUs"><i class="icon-bookmark"></i> Loop Delay</label>
-        <input type="text" id="node-config-input-loopDelayUs">
-    </div>
-
-
-
 </script>
