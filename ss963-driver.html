@@ -1,10 +1,14 @@
 <script tpe="text/javascript">
 
+	var currentConfig;
+	var node = this;
+
     RED.nodes.registerType('ss963-driver',{
+
         category: 'Raspberry Pi',
         color: '#FDF0C2',
         defaults: {
-			configName: 	{value:"", 		required: true},
+			Name: 			{value:"", 		required: true},
             portCount:      {value:96,      required:true, validate:RED.validators.number()},
             latchPin:       {value:2,       required:true, validate:RED.validators.number()},
             latchDelay:     {value:"0",     required:true, validate:RED.validators.number()},
@@ -16,28 +20,78 @@
         icon: "font-awesome/fa-flash",
 		paletteLabel: "SS963",
         label: function() {
-            return this.name ||  "SS963 Service";
+            return this.configName ||  "SS963 Service";
         },
+
 		oneditsave: function() {
-				
-		},		
+
+			if ($("#node-input-portCount").val() != this.portCount ||
+				$("#node-input-latchPin").val() != this.latchPin ||
+				$("#node-input-latchDelay").val() != this.latchDelay ||
+				$("#node-input-speed").val() != this.speed ||
+				$("#node-input-loopDelayUs").val() != this.loopDelayUs) {
+
+				var newConfigJSON = {
+                	PORT_COUNT: $("#node-input-portCount").val(),
+                    LATCH_PIN: $("#node-input-latchPin").val(),
+                    LATCH_DELAY: $("#node-input-latchDelay").val(),
+                    SPEED: $("#node-input-speed").val(),
+                    LOOP_DELAY_US: $("#node-input-loopDelayUs").val() 
+                };
+
+				function saveNewConfig(newConfigJSON) {
+                	$.getJSON('saveServiceConfigFile', newConfigJSON, function(result){
+                         console.log(result);
+                    });
+				}
+
+				var myNotification = RED.notify("The changes will affect all ss963 Service nodes across Node-RED and the ss963 service will be restarted. Do you confirm?", {
+			        modal: true,
+			        fixed: true,
+					type: 'warning',
+			        buttons: [
+			            {
+			                text: "Cancel",
+							class: "primary",
+			                click: function(e) {
+			                    myNotification.close();
+			                }
+			            },
+        			    {
+			                text: "Confirm",
+			                click: function(e) {
+								saveNewConfig(newConfigJSON);
+			                    myNotification.close();
+							}
+			            }
+			        ]
+			    }); //RED.notify
+
+			} //if
+
+		}, //oneditsave
+
 		oneditprepare: function() {
-            $.getJSON('getServiceConfFile', function(confFile) {
-				$("#node-input-portCount").val(confFile.PORT_COUNT);
-				$("#node-input-latchPin").val(confFile.LATCH_PIN);
-				$("#node-input-latchDelay").val(confFile.LATCH_DELAY);
-				$("#node-input-speed").val(confFile.SPEED);
-				$("#node-input-loopDelayUs").val(confFile.LOOP_DELAY_US);
-                console.log(data);
-            });			 
+            $.getJSON('getServiceConfFile', function(currentConfFile) {
+				this.portCount = currentConfFile.PORT_COUNT;				
+                this.latchPin = currentConfFile.LATCH_PIN;
+                this.latchDelay = currentConfFile.LATCH_DELAY;
+                this.speed = currentConfFile.SPEED;
+                this.loopDelayUs = currentConfFile.LOOP_DELAY_US;
+				$("#node-input-portCount").val(this.portCount);
+                $("#node-input-latchPin").val(this.latchPin);
+                $("#node-input-latchDelay").val(this.latchDelay);
+                $("#node-input-speed").val(this.speed);
+                $("#node-input-loopDelayUs").val(this.loopDelayUs);
+			}.bind(this));
 		}
 	});
 </script>
 
 <script type="text/html" data-template-name="ss963-driver">
     <div class="form-row">
-        <label for="node-input-configName"><i class="icon-tag"></i>Name</label>
-        <input type="text" id="node-input-configName" placeholder="Name">
+        <label for="node-input-Name"><i class="icon-tag"></i>Name</label>
+        <input type="text" id="node-input-Name" placeholder="Name">
     </div>
     <div class="form-row">
         <label for="node-input-portCount"><i class="icon-bookmark"></i> Port Count</label>

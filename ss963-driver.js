@@ -16,12 +16,13 @@ module.exports = function(RED) {
 		is_spi_exists();
 		is_service_running();;
 
-
+		// -------------------------------------------
 		node.on('close', function() {
         	RED.log.info(NODE_NAME + ': Node closed.');
 			RED.comms.publish('A message to admin');
 		});
 
+		// -------------------------------------------
 		node.on('input', function(msg) {
 
 			try {
@@ -41,7 +42,6 @@ module.exports = function(RED) {
 
 
 		// ----------------------------------------------------------
-
 		function  is_raspberry() {
 	        // Check Raspberry Pi Hardware
 	        var isPi = require('detect-rpi');
@@ -65,18 +65,42 @@ module.exports = function(RED) {
 	                    node.error("SHM Listener driver not loaded.");
 	                    node.status( {fill:"red", shape:"dot", text: "Servis is not runnig!"} );
 	                } else
-	                    node.status( {fill:"green", shape:"dot", text: "ss963.service is runnig!"} );
+	                    node.status( {fill:"green", shape:"dot", text: "ss963.service is runnig"} );
     	        });
 		}
 
+		function getServiceConfigurationAsJSON(fileName) {
+			const fs = require('fs');
+            const ini = require('ini');
+            const path = require("path");
+            return ini.parse(fs.readFileSync(path.resolve(__dirname, fileName), 'utf-8'));
+		}
 
-		// --------------------------------------
-        RED.httpAdmin.get("/getServiceConfFile", RED.auth.needsPermission('ss963Service.read'), function(req,res) {
+		// -------------------------------------------------
+        RED.httpAdmin.get("/saveServiceConfigFile", RED.auth.needsPermission('ss963Service.write'), function(req, res) {
+
+			const fs = require('fs');
+			const ini = require('ini');
+			const path = require("path");
+
+			var config = {
+				PORT_COUNT: req.query.PORT_COUNT ,
+                LATCH_PIN: req.query.LATCH_PIN,
+                LATCH_DELAY: req.query.LATCH_DELAY,
+                SPEED: req.query.SPEED,
+                LOOP_DELAY_US: req.query.LOOP_DELAY_US
+			}
+			fs.writeFileSync(path.resolve(__dirname, "service.conf"), ini.stringify(config, {}))
+			node.status( {fill:"blue", shape:"ring", text: "ss963.service restarted."} );
+        });
+
+		// -------------------------------------------------
+        RED.httpAdmin.get("/getServiceConfFile", RED.auth.needsPermission('ss963Service.read'), function(req, res) {
+
             const fs = require('fs');
             const ini = require('ini');
             const path = require("path");
-            const config = ini.parse(fs.readFileSync(path.resolve(__dirname, "service.conf"), 'utf-8'));
-            res.json(config);
+    	    res.json(ini.parse(fs.readFileSync(path.resolve(__dirname, "service.conf"), 'utf-8')));
         });
 
     }
