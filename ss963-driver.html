@@ -18,9 +18,9 @@
         inputs:1,
         outputs:1,
         icon: "font-awesome/fa-flash",
-		paletteLabel: "SS963",
+		paletteLabel: "MOSI",
         label: function() {
-            return this.configName ||  "SS963 Service";
+            return this.Name ||  "MOSI Service";
         },
 
 		oneditsave: function() {
@@ -40,12 +40,12 @@
                 };
 
 				function saveNewConfig(newConfigJSON) {
-                	$.getJSON('saveServiceConfigFile', newConfigJSON, function(result){
+                	$.getJSON('saveServiceConfFile', newConfigJSON, function(result){
                          console.log(result);
                     });
 				}
 
-				var myNotification = RED.notify("The changes will affect all ss963 Service nodes across Node-RED and the ss963 service will be restarted. Do you confirm?", {
+				var myNotification = RED.notify("The changes will affect all ss963 Service nodes across Node-RED and the ss963 service will be restarted. If you confirm, remember to Deploy flows. Do you confirm to change service configuration?", {
 			        modal: true,
 			        fixed: true,
 					type: 'warning',
