@@ -37,7 +37,7 @@
                     LATCH_DELAY: $("#node-input-latchDelay").val(),
                     SPEED: $("#node-input-speed").val(),
                     LOOP_DELAY_US: $("#node-input-loopDelayUs").val() 
-                };
+                node.log("testtttt");};
 
 				function saveNewConfig(newConfigJSON) {
                 	$.getJSON('saveServiceConfFile', newConfigJSON, function(result){
