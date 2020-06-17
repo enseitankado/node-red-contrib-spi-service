@@ -61,7 +61,7 @@ module.exports = function(RED) {
         // -------------------------------------------
         node.on('close', function() {
             RED.log.info(NODE_NAME + ': Node closed.');
-            RED.comms.publish('A message to admin');
+            RED.comms.publish('A message to admin for next relasess alarm.');
         });
 
 		// ----------------------------------------------------------
