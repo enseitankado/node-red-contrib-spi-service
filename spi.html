@@ -3,40 +3,48 @@
 	var currentConfig;
 	var node = this;
 
-    RED.nodes.registerType('ss963-driver',{
+    RED.nodes.registerType('spi-service',{
 
         category: 'Raspberry Pi',
         color: '#FDF0C2',
         defaults: {
-			Name: 			{value:"", 		required: true},
+			Name: 			{value:"SPI Service", 		required: true},
             portCount:      {value:96,      required:true, validate:RED.validators.number()},
-            latchPin:       {value:2,       required:true, validate:RED.validators.number()},
-            latchDelay:     {value:"0",     required:true, validate:RED.validators.number()},
+            latchPin:       {value:0,       required:true, validate:RED.validators.number()},
+            latchDelay:     {value:0,       required:true, validate:RED.validators.number()},
             speed:          {value:4000000, required:true, validate:RED.validators.number()},
-            loopDelayUs:    {value:100,     required:true, validate:RED.validators.number()}
+            loopDelayUs:    {value:100,     required:true, validate:RED.validators.number()},
+			shmSegmentKey:  {value:1000146, required:true, validate:RED.validators.number()},
+			disableSHMWriteBack:  {value:0, required:true, validate:RED.validators.number()}
         },
         inputs:1,
         outputs:1,
         icon: "font-awesome/fa-flash",
-		paletteLabel: "MOSI",
+		paletteLabel: "SPI Service",
         label: function() {
-            return this.Name ||  "MOSI Service";
+            return this.Name ||  "SPI Service";
         },
 
 		oneditsave: function() {
+
+			var disableSHMWB = ($("#node-input-disableSHMWriteBack").is(":checked")) ? 1 : 0;
 
 			if ($("#node-input-portCount").val() != this.portCount ||
 				$("#node-input-latchPin").val() != this.latchPin ||
 				$("#node-input-latchDelay").val() != this.latchDelay ||
 				$("#node-input-speed").val() != this.speed ||
-				$("#node-input-loopDelayUs").val() != this.loopDelayUs) {
+				$("#node-input-loopDelayUs").val() != this.loopDelayUs ||
+				$("#node-input-shmSegmentKey").val() != this.shmSegmentKey ||
+				disableSHMWB != this.disableSHMWriteBack) {
 
 				var newConfigJSON = {
                 	PORT_COUNT: $("#node-input-portCount").val(),
                     LATCH_PIN: $("#node-input-latchPin").val(),
                     LATCH_DELAY: $("#node-input-latchDelay").val(),
                     SPEED: $("#node-input-speed").val(),
-                    LOOP_DELAY_US: $("#node-input-loopDelayUs").val() 
+                    LOOP_DELAY_US: $("#node-input-loopDelayUs").val(),
+					DISABLE_SHM_WRITE_BACK: disableSHMWB,
+					SHM_SEGMENT_KEY: $("#node-input-shmSegmentKey").val()
                 };
 
 				function saveNewConfig(newConfigJSON) {
@@ -45,7 +53,7 @@
                     });
 				}
 
-				var myNotification = RED.notify("The changes will affect all ss963 Service nodes across Node-RED and the ss963 service will be restarted. If you confirm, remember to Deploy flows. Do you confirm to change service configuration?", {
+				var myNotification = RED.notify("The changes will affect all SPI Service nodes across Node-RED and the spiservice will be restarted. If you confirm, DONT FORGET to DEPLOY YOUR FLOWS !. Do you confirm to change service configuration?", {
 			        modal: true,
 			        fixed: true,
 					type: 'warning',
@@ -78,39 +86,60 @@
                 this.latchDelay = currentConfFile.LATCH_DELAY;
                 this.speed = currentConfFile.SPEED;
                 this.loopDelayUs = currentConfFile.LOOP_DELAY_US;
+				this.disableSHMWriteBack = currentConfFile.DISABLE_SHM_WRITE_BACK;
+				this.shmSegmentKey = currentConfFile.SHM_SEGMENT_KEY;
+
 				$("#node-input-portCount").val(this.portCount);
                 $("#node-input-latchPin").val(this.latchPin);
                 $("#node-input-latchDelay").val(this.latchDelay);
                 $("#node-input-speed").val(this.speed);
                 $("#node-input-loopDelayUs").val(this.loopDelayUs);
+				$("#node-input-disableSHMWriteBack").prop("checked", (this.disableSHMWriteBack == 0) ? false : true);
+				$("#node-input-shmSegmentKey").val(this.shmSegmentKey);
+
 			}.bind(this));
 		}
 	});
 </script>
 
-<script type="text/html" data-template-name="ss963-driver">
+<script type="text/html" data-template-name="spi-service">
     <div class="form-row">
         <label for="node-input-Name"><i class="icon-tag"></i>Name</label>
         <input type="text" id="node-input-Name" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-portCount"><i class="icon-bookmark"></i> Port Count</label>
+        <label for="node-input-portCount"><i class="icon-bookmark"> Port Count</label>
         <input type="text" id="node-input-portCount">
     </div>
     <div class="form-row">
-        <label for="node-input-latchPin"><i class="icon-bookmark"></i> Latch Pin</label>
+        <label for="node-input-latchPin"><i class="icon-bookmark"> Latch Pin</label>
         <input type="text" id="node-input-latchPin">
     </div>
     <div class="form-row">
-        <label for="node-input-latchDelay"><i class="icon-bookmark"></i> Latch Delay</label>
+        <label for="node-input-latchDelay"><i class="icon-bookmark"> Latch Delay</label>
         <input type="text" id="node-input-latchDelay">
     </div>
     <div class="form-row">
-        <label for="node-input-speed"><i class="icon-bookmark"></i> Speed </label>
+        <label for="node-input-speed"><i class="icon-bookmark"> Speed </label>
         <input type="text" id="node-input-speed">
     </div>
+
     <div class="form-row">
-        <label for="node-input-loopDelayUs"><i class="icon-bookmark"></i> Loop Delay</label>
+        <label for="node-input-loopDelayUs"><i class="icon-bookmark"> Loop Delay</label>
         <input type="text" id="node-input-loopDelayUs">
     </div>
+
+   <div class="form-row">
+		<label for="node-input-disableSHMWriteBack"> </label>
+		<label style="width:70%">
+			<input type="checkbox" id="node-input-disableSHMWriteBack" style="display:inline-block; width:22px; vertical-align:baseline;">
+			<span>Disable SHM Write-back from MISO</span>
+		</label>
+   </div>
+
+   <div class="form-row">
+        <label for="node-input-shmSegmentKey"><i class="icon-bookmark"> SHM Key</label>
+        <input type="text" id="node-input-shmSegmentKey" readonly> 
+    </div>
+
 </script>

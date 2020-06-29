@@ -1,13 +1,13 @@
 {
-  "name": "node-red-contrib-ss963-driver",
+  "name": "node-red-contrib-spi-service",
   "version": "1.0.0",
-  "description": "ss963 SHM driver",
-  "main": "ss963-driver.js",
+  "description": "SPI over SHM (Shared Memory)",
+  "main": "spi.js",
   "author": "Ozgur Koca",
   "license": "ISC",
   "node-red": {
     "nodes": {
-      "ss963-driver": "ss963-driver.js"
+      "ss963-driver": "spi.js"
     }
   },
   "dependencies": {
