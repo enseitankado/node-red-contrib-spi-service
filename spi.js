@@ -37,6 +37,16 @@ module.exports = function(RED) {
 				// Attach array to SHM
 				SHM = shm.create(SHM_size, 'Uint8Array', node.shmSegmentKey);
 
+
+				// Get current SHM payload
+				var backupPayload = msg.payload;
+				msg.payload = convert_shm_array_to_payload_array(SHM, SHM_size);
+
+				// Merge current SHM with new payload
+				backupPayload.forEach(function(value, index, sourceArr) {
+					msg.payload[index] = value;
+				});
+
 				// reverse ports and bits
 				let decimalArr = convert_payload_array_to_shm_array(msg.payload, SHM_size);
 				// Write to SHM
@@ -73,16 +83,14 @@ module.exports = function(RED) {
             RED.comms.publish('A message to admin for next relasess alarm.');
         });
 
-
-function sleep(milliseconds) {
-  const date = Date.now();
-  let currentDate = null;
-  do {
-    currentDate = Date.now();
-  } while (currentDate - date < milliseconds);
-}
-
-
+		// ---------------------------
+		function sleep(milliseconds) {
+			const date = Date.now();
+			let currentDate = null;
+			do {
+				currentDate = Date.now();
+			} while (currentDate - date < milliseconds);
+		}
 
 		// -------------------------------------------
         function convert_shm_array_to_payload_array(SHM_arr, SHM_size) {
