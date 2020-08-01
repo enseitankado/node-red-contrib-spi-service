@@ -37,7 +37,6 @@ module.exports = function(RED) {
 				// Attach array to SHM
 				SHM = shm.create(SHM_size, 'Uint8Array', node.shmSegmentKey);
 
-
 				// Get current SHM payload
 				var backupPayload = msg.payload;
 				msg.payload = convert_shm_array_to_payload_array(SHM, SHM_size);
@@ -47,8 +46,9 @@ module.exports = function(RED) {
 					msg.payload[index] = value;
 				});
 
-				// reverse ports and bits
+				// Reverses ports and bits. Last item will be sent at first.
 				let decimalArr = convert_payload_array_to_shm_array(msg.payload, SHM_size);
+
 				// Write to SHM
 				for (let i=0; i<SHM_size; i++)
 					SHM[i] = decimalArr[i];
@@ -159,8 +159,19 @@ module.exports = function(RED) {
 	            (error, stdout, stderr) => {
 
 	                if (!stdout.includes("Active: active (running)")) {
-	                    node.error("SHM Listener driver not loaded.");
-	                    node.status( {fill:"red", shape:"dot", text: "Service is not runnig!"} );
+
+                		exec("sudo /bin/ps -aux | grep spiservice",  (error, stdout, stderr) => {
+                     		if (stdout.includes("/usr/sbin/spiservice")) {
+
+                                node.log("SHM Listener service is propably running in console mode.");
+                                node.status( {fill:"red", shape:"dot", text: "The service is probably running in console mode!"} );
+
+							} else {
+                		        node.error("SHM Listener driver not loaded.");
+                        		node.status( {fill:"red", shape:"dot", text: "Service is not runnig!"} );
+							}
+                		});
+
 	                } else {
 	                    node.status( {fill:"green", shape:"dot", text: "Service is running"} );
 					}

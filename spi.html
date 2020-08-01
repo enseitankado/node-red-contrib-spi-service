@@ -81,7 +81,7 @@
 
 		oneditprepare: function() {
             $.getJSON('getServiceConfFile', function(currentConfFile) {
-				this.portCount = currentConfFile.PORT_COUNT;				
+				this.portCount = currentConfFile.PORT_COUNT;
                 this.latchPin = currentConfFile.LATCH_PIN;
                 this.latchDelay = currentConfFile.LATCH_DELAY;
                 this.speed = currentConfFile.SPEED;
@@ -109,13 +109,24 @@
     <dl class="message-properties">
         <dt>msg.payload<span class="property-type">array</span></dt>
         <dd>The payload sequence is written directly to the SHM memory area and then sent to the SPI port.
-The payload array is the length configured with portcount, and each element can have only 0 or 1. The payload string in the incoming message does not always have to be portcount long. However, the index of an element should not exceed the portcount value. If you wish, you can set the entire payload sequence, or only certain port values can be adjusted.</dd>
+			The payload array is the length configured with portcount, and each element can have only 0 or 1.
+			The payload string in the incoming message does not always have to be portcount long.
+			However, the index of an element should not exceed the portcount value.
+			If you wish, you can set the entire payload sequence, or only certain port values can be adjusted.
+		</dd>
     </dl>
 
     <h3>Output</h3>
     <dl class="message-properties">
         <dt>msg.payload<span class="property-type">array</span></dt>
-        <dd>The port values of the output message are read from the SHM memory area in the payload array. If the SHM write feature is enabled, the data applied to the MISO input is reflected in the payload array. Otherwise there is the latest data sent to the SPI port. <p><b>Note:</b>The node waits about 10ms to allow time for the SHM to be updated by the service. Therefore, when SHM rewriting is enabled, the output message reaches 10ms delay.</p></dd>
+        <dd>The port values of the output message are read from the SHM memory area in the payload array.
+			If the SHM write feature is enabled, the data applied to the MISO input is reflected in the payload array. 
+			Otherwise there is the latest data sent to the SPI port. 
+			<p>
+				<b>Note:</b>The node waits about 10ms to allow time for the SHM to be updated by the service.
+				Therefore, when SHM rewriting is enabled, the output message reaches 10ms delay.
+			</p>
+		</dd>
     </dl>
 
 	<h3>Node Configuration</h3>
@@ -141,9 +152,25 @@ The payload array is the length configured with portcount, and each element can 
     	    <dt>Latch Pin<span class="property-type">numeric/optional</span></dt>
 			<dd>
                 Latch pin number as GPIO/BCM numbering.
-                <p>Default value is: 0 and disabled.</p>
-				<p>If your SPI hardware has latch pin (eq: 75HC595) you can define a GPIO pin.
-				Otherwise please disable.</p>
+              	Default value is: 0 and disabled.
+				If your SPI hardware has latch pin (ex.: 75HC595) you can define a GPIO pin otherwise set it to 0.
+				<h3>A special case with the latch function</h3>
+				<p>
+					There is a special issue with applications where the latch function is used.
+					When data changed in the shared memory area (SHM) then SPI service writes the data to the SPI port and trigs a latch function.
+					While data is written to the MOSI output of spi at every clock pulse, the data in the MISO input is written back to
+					the same SPI buffer (hardware buffer).
+					So when data is written to MOSI (if MISO is not connected reads every time logic 0), the SPI buffer and SHM changes through by MISO.
+					That is, writing and reading to SPI takes place simultaneously with a common clock pulse.
+					If you need to read SPI data without running the latch function at a certain time in your application
+					with the latch function enabled, you can tell the service to temporarily not run the latch function.
+					Thus, while MOSI data is not processed on the device connected to the latch function,
+					you can read the MISO data returned from the device.
+					You can use the "DISABLE_LATCH" bit in the SHM field to instantly disable the latch function.
+					You can write the data "1" here to enable this bit set at the end of the SHM field.
+					"1" data written to the <b>Port Count</b> + 1 over NodeRED will be detected by the service and LATCH operation will not be performed.
+					Although the LATCH pin is defined in the Properties panel, the LATCH function will not be executed until the "DISABLE_LATCH" bit is set to "0".
+				</p>
 			</dd>
 	    </dl>
 	    <dl class="message-properties">
