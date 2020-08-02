@@ -34,14 +34,14 @@ module.exports = function(RED) {
 			try {
 				var SHM_size = Math.ceil(node.portCount/8);
 
-				// Attach array to SHM
+				// Attach to SHM and read SHM (Shared Memory) into SHM array
 				SHM = shm.create(SHM_size, 'Uint8Array', node.shmSegmentKey);
 
 				// Get current SHM payload
 				var backupPayload = msg.payload;
 				msg.payload = convert_shm_array_to_payload_array(SHM, SHM_size);
 
-				// Merge current SHM with new payload
+				// Merge new payload with current SHM
 				backupPayload.forEach(function(value, index, sourceArr) {
 					msg.payload[index] = value;
 				});
@@ -92,7 +92,9 @@ module.exports = function(RED) {
 			} while (currentDate - date < milliseconds);
 		}
 
-		// -------------------------------------------
+		// ---------------------------------------------------------------
+		// Reverse bit orders of evey byte then reverse order of all bytes
+		// ---------------------------------------------------------------
         function convert_shm_array_to_payload_array(SHM_arr, SHM_size) {
 
 			var binArr = [];
@@ -111,6 +113,7 @@ module.exports = function(RED) {
 
 		// -----------------------------------------------------------
 		// Convert binary presented payload array to new decimal array
+		// -----------------------------------------------------------
 		function convert_payload_array_to_shm_array(payload_arr, SHM_size) {
 
             var i = 0;
